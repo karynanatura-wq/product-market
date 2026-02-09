@@ -97,14 +97,12 @@
       place-items: center; /* центрування */
     }
     .logoCard img{
-      max-width: 100%;
-      max-height: 100%;
-      width: 100%;
-      height: 100%;
-      object-fit: contain; /* НЕ виходить за межі */
-      display: block;
-      filter: drop-shadow(0 6px 10px rgba(0,0,0,0.06));
+      height: 55px;
     }
+   .logoCard .biggerImg{
+     height: 120px;
+     margin-top: -25px;
+   }
 
     .logoCard.selected{
       background: var(--logoSelected);
@@ -144,10 +142,8 @@
     .productCard:active{ transform: scale(0.985); }
 
     .productCard .imgWrap{
-      width: 100%;
-      height: 100%;
-      display: grid;
-      place-items: center; /* центрування */
+      height: 115px;
+      margin-top: -10px;
     }
     .productCard img{
       max-width: 100%;
@@ -279,15 +275,15 @@
         </button>
 
         <button id="logo1Btn" class="logoCard" type="button" data-logo="1" aria-label="logo (1)">
-          <div class="imgWrap"><img src="logo%20(1).png" alt="logo (1)" /></div>
+          <div class="imgWrap"><img class="biggerImg" src="logo%20(1).png" alt="logo (1)" /></div>
         </button>
 
         <button class="logoCard" type="button" data-logo="4" aria-label="logo (4)">
-          <div class="imgWrap"><img src="logo%20(4).png" alt="logo (4)" /></div>
+          <div class="imgWrap"><img class="biggerImg" src="logo%20(4).png" alt="logo (4)" /></div>
         </button>
 
         <button class="logoCard" type="button" data-logo="2" aria-label="logo (2)">
-          <div class="imgWrap"><img src="logo%20(2).png" alt="logo (2)" /></div>
+          <div class="imgWrap"><img class="biggerImg" src="logo%20(2).png" alt="logo (2)" /></div>
         </button>
       </div>
     </section>
