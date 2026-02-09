@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Mobile Pink UI</title>
+  <style>
+    :root{
+      --bg: #fde6ee;           /* світло-рожевий фон */
+      --cream: #fff2df;        /* кремовий */
+      --pinkShadow: rgba(221, 88, 150, 0.45);
+      --pink: #f6b6cf;
+      --pinkDark: #d94c8a;     /* темно-рожевий для вибору продукту */
+      --logoSelected: #f0d1db; /* темніший для 2-го лого */
+      --text: #5a2a3b;
+      --radius: 18px;
+    }
+
+    *{ box-sizing: border-box; }
+    html, body{
+      height: 100%;
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* контейнер додатку */
+    #app{
+      min-height: 100%;
+      padding: 16px;
+      padding-top: calc(16px + env(safe-area-inset-top));
+      padding-bottom: calc(18px + env(safe-area-inset-bottom));
+      display: grid;
+      place-items: start center;
+    }
+
+    .screen{
+      width: min(520px, 100%);
+      transition: opacity .28s ease, transform .28s ease;
+    }
+    .hidden{
+      display: none !important;
+    }
+
+    /* ---------- Екран 1 (4 горизонтальні вікна з логотипами) ---------- */
+    .logoList{
+      display: grid;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .logoCard{
+      height: clamp(72px, 12vh, 92px);
+      border-radius: 16px;
+      background: var(--cream);
+      box-shadow: 0 10px 24px var(--pinkShadow);
+      border: 1px solid rgba(221, 88, 150, 0.25);
+      display: grid;
+      place-items: center;
+      padding: 10px;
+      user-select: none;
+      cursor: pointer;
+      transition: transform .12s ease, background .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+    .logoCard:active{
+      transform: scale(0.985);
+    }
+    .logoCard img{
+      max-height: 100%;
+      max-width: 70%;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,0.06));
+    }
+    .logoCard.selected{
+      background: var(--logoSelected);
+      box-shadow: 0 12px 28px rgba(221, 88, 150, 0.55);
+    }
+
+    /* ---------- Екран 2 (6 вертикальних вікон з продуктами + box) ---------- */
+    .productsWrap{
+      width: 100%;
+      display: grid;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .grid{
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      width: 100%;
+    }
+
+    .productCard{
+      height: clamp(120px, 20vh, 170px);
+      border-radius: var(--radius);
+      background: rgba(255, 242, 223, 0.92);
+      border: 1px solid rgba(221, 88, 150, 0.25);
+      box-shadow: 0 12px 26px rgba(221, 88, 150, 0.18);
+      display: grid;
+      place-items: center;
+      padding: 12px;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+      transition: transform .12s ease, background .18s ease, box-shadow .18s ease;
+    }
+    .productCard:active{ transform: scale(0.985); }
+    .productCard img{
+      max-width: 78%;
+      max-height: 78%;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 8px 12px rgba(0,0,0,0.08));
+    }
+
+    .productCard.selected{
+      background: var(--pinkDark);
+      box-shadow: 0 16px 34px rgba(217, 76, 138, 0.35);
+    }
+    .productCard.selected img{
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,0.10));
+    }
+
+    .productCard.gone{
+      opacity: 0.15;
+      filter: grayscale(0.25);
+      pointer-events: none;
+    }
+
+    .boxArea{
+      width: 100%;
+      display: grid;
+      place-items: center;
+      padding-top: 2px;
+    }
+
+    #boxBtn{
+      width: clamp(76px, 22vw, 110px);
+      height: auto;
+      cursor: pointer;
+      user-select: none;
+      transition: transform .12s ease, filter .18s ease;
+      filter: drop-shadow(0 14px 20px rgba(221, 88, 150, 0.22));
+    }
+    #boxBtn:active{
+      transform: scale(0.97);
+    }
+
+    /* ---------- Плавний перехід між екранами ---------- */
+    .fadeOut{
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events: none;
+    }
+    .fadeIn{
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ---------- Анімація "політ у коробку" ---------- */
+    .flyClone{
+      position: fixed;
+      z-index: 50;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+
+    /* ---------- Фінальний блюр + галочка ---------- */
+    #successOverlay{
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+
+    #successOverlay.show{
+      display: flex;
+    }
+
+    /* блюр всього екрану (контенту) */
+    body.done #app{
+      filter: blur(8px);
+      transform: scale(1.01);
+      transition: filter .25s ease, transform .25s ease;
+    }
+
+    /* напівпрозорий шар, щоб було “весь екран блюриться” + м’яке затемнення */
+    #successOverlay::before{
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(253, 230, 238, 0.35);
+      backdrop-filter: blur(2px);
+    }
+
+    .successIcon{
+      position: relative;
+      width: clamp(92px, 28vw, 140px);
+      height: clamp(92px, 28vw, 140px);
+      display: grid;
+      place-items: center;
+      z-index: 1;
+    }
+    .successIcon img{
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      animation: spin 1.2s linear infinite;
+      filter: drop-shadow(0 16px 26px rgba(0,0,0,0.12));
+    }
+    @keyframes spin{
+      from{ transform: rotate(0deg); }
+      to{ transform: rotate(360deg); }
+    }
+
+    /* маленький заголовок (не обов’язково, але приємно виглядає) */
+    .hint{
+      text-align: center;
+      opacity: .75;
+      font-size: 13px;
+      margin: 0 0 12px 0;
+    }
+
+    /* доступність: кнопки без outline на мобілках */
+    .logoCard:focus-visible,
+    .productCard:focus-visible,
+    #boxBtn:focus-visible{
+      outline: 3px solid rgba(217, 76, 138, 0.45);
+      outline-offset: 3px;
+    }
+  </style>
+</head>
+<body>
+  <main id="app">
+    <!-- ЕКРАН 1 -->
+    <section id="screen1" class="screen fadeIn" aria-label="Вибір логотипу">
+      <p class="hint">Оберіть друге вікно з <b>logo (1)</b></p>
+
+      <div class="logoList">
+        <button class="logoCard" type="button" data-logo="3" aria-label="logo (3)">
+          <img src="logo%20(3).png" alt="logo (3)" />
+        </button>
+
+        <button id="logo1Btn" class="logoCard" type="button" data-logo="1" aria-label="logo (1)">
+          <img src="logo%20(1).png" alt="logo (1)" />
+        </button>
+
+        <button class="logoCard" type="button" data-logo="4" aria-label="logo (4)">
+          <img src="logo%20(4).png" alt="logo (4)" />
+        </button>
+
+        <button class="logoCard" type="button" data-logo="2" aria-label="logo (2)">
+          <img src="logo%20(2).png" alt="logo (2)" />
+        </button>
+      </div>
+    </section>
+
+    <!-- ЕКРАН 2 -->
+    <section id="screen2" class="screen hidden" aria-label="Вибір продуктів">
+      <div class="productsWrap">
+        <div class="grid" id="productsGrid">
+          <!-- порядок: (3),(4),(5),(2),(1),(6) -->
+          <button class="productCard" type="button" data-product="3" aria-label="product (3)">
+            <img src="product%20(3).png" alt="product (3)" />
+          </button>
+          <button class="productCard" type="button" data-product="4" aria-label="product (4)">
+            <img src="product%20(4).png" alt="product (4)" />
+          </button>
+          <button class="productCard" type="button" data-product="5" aria-label="product (5)">
+            <img src="product%20(5).png" alt="product (5)" />
+          </button>
+          <button class="productCard" type="button" data-product="2" aria-label="product (2)">
+            <img src="product%20(2).png" alt="product (2)" />
+          </button>
+          <button class="productCard" type="button" data-product="1" aria-label="product (1)">
+            <img src="product%20(1).png" alt="product (1)" />
+          </button>
+          <button class="productCard" type="button" data-product="6" aria-label="product (6)">
+            <img src="product%20(6).png" alt="product (6)" />
+          </button>
+        </div>
+
+        <div class="boxArea">
+          <img id="boxBtn" src="box.png" alt="box" role="button" tabindex="0" />
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Оверлей успіху -->
+  <div id="successOverlay" aria-hidden="true">
+    <div class="successIcon" aria-label="Успіх">
+      <img src="galka.png" alt="Галочка" />
+    </div>
+  </div>
+
+  <script>
+    const screen1 = document.getElementById('screen1');
+    const screen2 = document.getElementById('screen2');
+    const logo1Btn = document.getElementById('logo1Btn');
+    const productsGrid = document.getElementById('productsGrid');
+    const boxBtn = document.getElementById('boxBtn');
+    const successOverlay = document.getElementById('successOverlay');
+
+    let animating = false;
+
+    // 1) Натиснули на друге вікно (logo (1)) -> темніше, потім перехід на екран 2
+    logo1Btn.addEventListener('click', () => {
+      if (animating) return;
+      logo1Btn.classList.add('selected');
+
+      // коротка пауза, щоб було видно зміну кольору
+      setTimeout(() => {
+        transitionToScreen2();
+      }, 220);
+    });
+
+    function transitionToScreen2(){
+      animating = true;
+      // сховати екран 1
+      screen1.classList.add('fadeOut');
+
+      setTimeout(() => {
+        screen1.classList.add('hidden');
+
+        // показати екран 2
+        screen2.classList.remove('hidden');
+        // легкий "fade in"
+        screen2.classList.remove('fadeOut');
+        screen2.classList.add('fadeIn');
+
+        animating = false;
+      }, 260);
+    }
+
+    // 2) Вибір продуктів: натиснули -> вікно темно-рожеве
+    productsGrid.addEventListener('click', (e) => {
+      const card = e.target.closest('.productCard');
+      if (!card || animating || card.classList.contains('gone')) return;
+
+      card.classList.toggle('selected');
+    });
+
+    // 3) Клік по box.png -> продукти летять до box і зникають, далі блюр + галка, що крутиться
+    boxBtn.addEventListener('click', () => runBoxAnimation());
+    boxBtn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        runBoxAnimation();
+      }
+    });
+
+    async function runBoxAnimation(){
+      if (animating) return;
+
+      const selectedCards = [...document.querySelectorAll('.productCard.selected:not(.gone)')];
+      if (selectedCards.length === 0) {
+        // якщо нічого не вибрано — маленький "поштовх" коробки
+        boxBtn.animate(
+          [{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(-3px) scale(1.02)' }, { transform: 'translateY(0) scale(1)' }],
+          { duration: 260, easing: 'ease-out' }
+        );
+        return;
+      }
+
+      animating = true;
+
+      const boxRect = boxBtn.getBoundingClientRect();
+      const boxCenterX = boxRect.left + boxRect.width / 2;
+      const boxCenterY = boxRect.top + boxRect.height / 2;
+
+      // робимо "політ" для кожної вибраної картки
+      const flights = selectedCards.map((card, i) => flyCardToBox(card, boxCenterX, boxCenterY, i));
+      await Promise.all(flights);
+
+      // після польоту — блюр + галка
+      document.body.classList.add('done');
+      successOverlay.classList.add('show');
+      successOverlay.setAttribute('aria-hidden', 'false');
+
+      animating = false;
+    }
+
+    function flyCardToBox(card, boxCenterX, boxCenterY, index){
+      return new Promise((resolve) => {
+        const img = card.querySelector('img');
+        const rect = img.getBoundingClientRect();
+
+        // клон зображення для анімації (щоб не "скакало" всередині grid)
+        const clone = img.cloneNode(true);
+        clone.classList.add('flyClone');
+        clone.style.left = rect.left + 'px';
+        clone.style.top = rect.top + 'px';
+        clone.style.width = rect.width + 'px';
+        clone.style.height = rect.height + 'px';
+        clone.style.objectFit = 'contain';
+        document.body.appendChild(clone);
+
+        const startX = rect.left + rect.width / 2;
+        const startY = rect.top + rect.height / 2;
+
+        const dx = boxCenterX - startX;
+        const dy = boxCenterY - startY;
+
+        const duration = 520 + index * 60;
+
+        const anim = clone.animate(
+          [
+            { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+            { transform: `translate(${dx}px, ${dy}px) scale(0.45)`, opacity: 0.15 }
+          ],
+          { duration, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' }
+        );
+
+        anim.onfinish = () => {
+          clone.remove();
+          card.classList.remove('selected');
+          card.classList.add('gone');     // "зникли" (приглушені + недоступні)
+          resolve();
+        };
+      });
+    }
+  </script>
+
+  <!--
+    ВАЖЛИВО:
+    Покладіть файли зображень в ту ж папку, що й цей HTML:
+      logo (1).png, logo (2).png, logo (3).png, logo (4).png
+      product (1).png ... product (6).png
+      box.png
+      galka.png
+    (назви з пробілами підтримуються; у src вони закодовані як %20)
+  -->
+</body>
+</html>
